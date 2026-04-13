@@ -702,6 +702,17 @@ function ld(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}ca
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 function uid(){return'_'+Math.random().toString(36).substr(2,9)}
 
+// ═══════════ DATA MIGRATION ═══════════
+// Bump this version string whenever bills/groups/buckets change — forces a reset of those keys
+const DATA_VERSION = 'v7';
+function migrate(){
+  if(localStorage.getItem('c4_data_version')===DATA_VERSION) return;
+  // Wipe stale bill/group/bucket data so new defaults load cleanly
+  ['c4_bills','c4_bgroups','c4_wb','c4_debts'].forEach(k=>localStorage.removeItem(k));
+  localStorage.setItem('c4_data_version', DATA_VERSION);
+}
+migrate();
+
 // ═══════════ DATA ═══════════
 let D={
   income:ld('c4_income',{salary:3100,partner:1100,bonus:900,bmonths:['Feb','May','Aug','Nov']}),
@@ -729,7 +740,7 @@ let D={
     {id:'b16',name:'NW Mastercard (min)',emoji:'💳',amt:111,day:15,type:'dd',group:'bg2',notes:''},
     {id:'b17',name:'Dog Charity',emoji:'🐶',amt:15,day:7,type:'dd',group:'bg2',notes:''},
     {id:'b18',name:'Amazon Prime',emoji:'📦',amt:8.99,day:9,type:'sub',group:'bg2',notes:''},
-    {id:'b19',name:'Apple Storage',emoji:'📱',amt:8.99,day:4,type:'sub',group:'bg2',notes:''},
+    {id:'b19',name:'Apple Storage',emoji:'🍎',amt:8.99,day:4,type:'sub',group:'bg2',notes:''},
     {id:'b20',name:'Ring Doorbell',emoji:'🔔',amt:4.99,day:24,type:'sub',group:'bg2',notes:''},
     {id:'b21',name:'Samsung TV',emoji:'📺',amt:3.99,day:1,type:'sub',group:'bg2',notes:''},
     {id:'b22',name:'Google Storage',emoji:'☁️',amt:1.59,day:5,type:'sub',group:'bg2',notes:''},
@@ -767,6 +778,7 @@ function persist(){
   sv('c4_goals',D.goals);sv('c4_debts',D.debts);sv('c4_wb',D.wBuckets);
   sv('c4_wfixed',D.wFixed);sv('c4_events',D.events);sv('c4_bdm',D.billsDoneByMonth);
   sv('c4_cm',D.curMonth);sv('c4_bs',D.billSort);
+  localStorage.setItem('c4_data_version',DATA_VERSION);
 }
 
 // Bills done state per month
